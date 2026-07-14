@@ -1,0 +1,62 @@
+/* resources/css/menu.css */
+body { background: #f6f2ed; }
+
+.app-container { max-width: 100%; padding: 0 10px; margin: auto; }
+.header { display: flex; justify-content: space-between; align-items: center; }
+
+.logo-wrapper {
+    width: 40px; height: 40px; background: #5C3A21;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+}
+.logo-img { width: 22px; height: 22px; object-fit: contain; }
+
+.badge-table {
+    background: #5C3A21; color: white; border-radius: 20px;
+    padding: 5px 12px; font-size: 12px;
+}
+
+.category-wrapper { background: #e7dfd6; padding: 5px; border-radius: 20px; display: flex; gap: 5px; }
+.category-btn { flex: 1; border-radius: 20px; border: none; background: transparent; padding: 6px; }
+.category-active { background: white; font-weight: 500; }
+
+.sub-btn { border-radius: 20px; border: 1px solid #ccc; background: white; padding: 6px 12px; font-size: 13px; }
+.sub-active { background: #8B5E3C; color: white; border: none; }
+
+.menu-card { border-radius: 15px; overflow: hidden; border: none; }
+.menu-img { height: 140px; object-fit: cover; }
+.btn-add { background: #8B5E3C; color: white; border-radius: 20px; font-size: 12px; padding: 4px 10px; }
+.price { font-weight: bold; }
+
+.cart-header {
+    position: relative; width: 38px; height: 38px; background: #5C3A21;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+#cart-count {
+    position: absolute; top: -4px; right: -4px; background: red;
+    color: white; font-size: 10px; width: 18px; height: 18px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+}
+.cart-icon { width: 18px; height: 18px; filter: brightness(0) invert(1); }
+
+@media(min-width: 768px){
+    .app-container { max-width: 900px; }
+    .menu-img { height: 160px; }
+}
+
+/* Tambahkan kode ini ke resources/css/menu.css */
+
+.reset-cart {
+    background: #5C3A21;
+    color: white;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.3s ease; /* Efek halus saat di-hover */
+}
+
+.reset-cart:hover {
+    background: #4a2e1a; /* Warna sedikit lebih gelap saat di-hover */
+    color: #ffffff;
+}

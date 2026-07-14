@@ -1,0 +1,209 @@
+/* =====================================================
+   public/css/payment-cash.css
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    min-height: 100vh;
+    background: #f5ede4;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    padding: 24px 16px 48px;
+    color: #2c1a0e;
+}
+
+/* ── Wrapper ── */
+.wrapper {
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+/* ── Top Bar ── */
+.topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.topbar .back-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.10);
+    color: #2c1a0e;
+    font-size: 16px;
+    text-decoration: none;
+}
+.topbar h1 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* ── Instruksi ── */
+.nota-instruction {
+    background: #fdf6f0;
+    border: 1.5px dashed #d4a985;
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: center;
+    margin-bottom: 16px;
+}
+.nota-instruction .icon { font-size: 26px; margin-bottom: 6px; }
+.nota-instruction p {
+    font-size: 13px;
+    color: #7a5c45;
+    line-height: 1.6;
+}
+.nota-instruction strong { color: #3d1f0d; }
+
+/* ── Card / Nota ── */
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+}
+
+/* Nota header */
+.nota-header {
+    text-align: center;
+    padding-bottom: 14px;
+    border-bottom: 1.5px dashed #e8ddd6;
+    margin-bottom: 14px;
+}
+.nota-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #3d1f0d;
+}
+.nota-header p {
+    font-size: 12px;
+    color: #b8957a;
+    margin-top: 4px;
+}
+
+/* Info rows */
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 8px 0;
+    color: #7a5c45;
+    border-bottom: 1px solid #f5ede4;
+}
+.info-row .val { font-weight: 600; color: #2c1a0e; }
+
+/* Dashed divider */
+.divider-dashed {
+    border: none;
+    border-top: 1.5px dashed #e8ddd6;
+    margin: 14px 0;
+}
+
+/* ── Section Label ── */
+.section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #b8957a;
+    margin-bottom: 10px;
+}
+
+/* ── Menu Rows (struk style) ── */
+.menu-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom: 1px dotted #f0e6de;
+}
+.menu-row:last-child { border-bottom: none; }
+
+.menu-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    padding-right: 12px;
+}
+
+.menu-num {
+    font-size: 13px;
+    font-weight: 600;
+    color: #2c1a0e;
+}
+
+.menu-qty-price {
+    font-size: 12px;
+    color: #a07856;
+    padding-left: 14px;
+}
+
+.menu-subtotal {
+    font-size: 13px;
+    font-weight: 600;
+    color: #2c1a0e;
+    white-space: nowrap;
+    padding-top: 1px;
+}
+
+/* Total row */
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.total-row .lbl   { font-size: 15px; font-weight: 700; }
+.total-row .amount {
+    font-size: 22px;
+    font-weight: 700;
+    color: #3d1f0d;
+}
+
+/* Payment method */
+.payment-method {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #7a5c45;
+    justify-content: center;
+}
+.payment-method .method-icon { font-size: 20px; }
+
+/* Badge status */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.badge-menunggu   { background: #fff3e0; color: #e65100; }
+.badge-diproses   { background: #e3f2fd; color: #1565c0; }
+.badge-selesai    { background: #e8f5e9; color: #2e7d32; }
+.badge-dibatalkan { background: #fce4ec; color: #c62828; }
+
+/* Footer */
+.footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: #b8957a;
+    margin-top: 4px;
+}
+
+/* ── PRINT ── */
+@media print {
+    body { background: #fff; padding: 0; }
+    .no-print { display: none !important; }
+    .card { box-shadow: none; border: 1px solid #ddd; border-radius: 0; }
+    .wrapper { max-width: 100%; }
+}
