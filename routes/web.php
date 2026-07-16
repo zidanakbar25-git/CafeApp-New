@@ -11,6 +11,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\AdminManagementController;
 use App\Http\Controllers\AdminMenuController;
+use App\Http\Controllers\ManualOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +63,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/orders/{id}', [OrderController::class, 'destroy'])->name('admin.orders.destroy');
     Route::get('/admin/orders/{id}/struk', [OrderController::class, 'struk'])->name('admin.orders.struk');
     Route::get('/admin/orders/history', [HistoryController::class, 'index'])->name('admin.orders.history');
+
+    // Kasir only — Order Manual (Takeaway)
+    Route::middleware('role:cashier')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/manual-order', [ManualOrderController::class, 'index'])->name('manualOrder.index');
+        Route::post('/manual-order/add', [ManualOrderController::class, 'addItem'])->name('manualOrder.addItem');
+        Route::post('/manual-order/checkout', [ManualOrderController::class, 'checkout'])->name('manualOrder.checkout');
+         Route::post('/manual-order/qris/finalize', [ManualOrderController::class, 'qrisFinalize'])->name('manualOrder.qrisFinalize');
+    });
+
 
     // Manager only
     Route::middleware('role:manager')->prefix('admin')->name('admin.')->group(function () {

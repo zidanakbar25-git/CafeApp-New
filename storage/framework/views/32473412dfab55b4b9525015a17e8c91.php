@@ -150,6 +150,12 @@
                     <i class="fa-solid fa-gauge-high"></i>
                     <span>Dashboard</span>
                 </a>
+
+                <a href="<?php echo e(route('admin.manualOrder.index')); ?>"
+                class="nav-link-custom <?php echo e(Request::routeIs('admin.manualOrder.*') ? 'active' : ''); ?>">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>Order Manual</span>
+                </a>
             </nav>
         </div>
         <?php endif; ?>

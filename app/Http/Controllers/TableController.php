@@ -13,7 +13,8 @@ class TableController extends Controller
      */
     public function index(Request $request)
     {
-        $query = CafeTable::orderByRaw('CAST(table_number AS UNSIGNED)');
+        $query = CafeTable::where('table_number', '!=', 'Takeaway')
+    ->orderByRaw('CAST(table_number AS UNSIGNED)');
 
         if ($request->filled('search')) {
             $query->where('table_number', 'like', '%' . $request->search . '%');
