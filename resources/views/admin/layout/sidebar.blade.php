@@ -150,6 +150,12 @@
                     <i class="fa-solid fa-gauge-high"></i>
                     <span>Dashboard</span>
                 </a>
+
+                <a href="{{ route('admin.manualOrder.index') }}"
+                class="nav-link-custom {{ Request::routeIs('admin.manualOrder.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>Order Manual</span>
+                </a>
             </nav>
         </div>
         @endif
