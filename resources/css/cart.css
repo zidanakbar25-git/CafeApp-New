@@ -180,12 +180,14 @@ html, body {
     font-weight: 600;
     color: var(--brown-light);
     margin-bottom: 8px;
+    white-space: nowrap;
 }
 
 .cart-item-subtotal {
     font-size: 0.82rem;
     color: var(--text-muted);
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .cart-item-subtotal span {
@@ -205,11 +207,15 @@ html, body {
 .qty-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     background: var(--cream);
     border-radius: 50px;
-    padding: 4px 6px;
+    padding: 3px 5px;
     border: 1.5px solid var(--border);
+}
+
+.qty-value {
+    min-width: 18px;
 }
 
 .qty-btn {

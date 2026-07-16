@@ -59,6 +59,8 @@
         .info-label { color: #6b7280; font-size: 12px; margin-bottom: 2px; }
         .info-value { font-size: 14px; font-weight: 600; color: #0b1533; }
         .menu-item  { background: #f9fafb; border-radius: 12px; padding: 9px 13px; margin-top: 8px; font-size: 13px; }
+        .menu-item-options { margin-top: 6px; padding-left: 8px; border-left: 2px solid #e5e7eb; }
+        .menu-item-option-line { display: block; font-size: 11.5px; color: #6b7280; line-height: 1.5; }
 
         .badge-menunggu      { background: #fff3cd; color: #d97706; }
         .badge-diproses      { background: #dbeafe; color: #2563eb; }
@@ -297,9 +299,20 @@
 
                                     <!-- Items -->
                                     @foreach($order->orderDetails as $detail)
-                                    <div class="menu-item d-flex justify-content-between">
-                                        <span>{{ $detail->menu->name ?? '-' }} × {{ $detail->quantity }}</span>
-                                        <span>Rp {{ number_format($detail->subtotal,0,',','.') }}</span>
+                                    <div class="menu-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span>{{ $detail->menu->name ?? '-' }} × {{ $detail->quantity }}</span>
+                                            <span>Rp {{ number_format($detail->subtotal,0,',','.') }}</span>
+                                        </div>
+                                        @if ($detail->options->isNotEmpty())
+                                        <div class="menu-item-options">
+                                            @foreach ($detail->options as $opt)
+                                                <span class="menu-item-option-line">
+                                                    {{ $opt->group_name }}: {{ $opt->option_name ?? $opt->text_value }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                        @endif
                                     </div>
                                     @endforeach
 

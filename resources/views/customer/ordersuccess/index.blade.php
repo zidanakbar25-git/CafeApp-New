@@ -7,6 +7,29 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     @vite('resources/css/cart.css')
+
+    <style>
+    .item-options {
+        margin-top: 3px;
+        padding-left: 8px;
+        border-left: 2px solid #EADCD0;
+    }
+
+    .item-option-line {
+        display: block;
+        font-size: 11px;
+        color: #999;
+        line-height: 1.5;
+    }
+
+    .receipt-option-line {
+        font-size: 11px;
+        color: #555;
+        padding-left: 10px;
+    }
+</style>
+
+
 </head>
 
 @php
@@ -119,7 +142,7 @@
 
             @foreach ($items as $item)
 
-                <div class="summary-row" style="margin-bottom:12px;">
+                <div class="summary-row" style="margin-bottom:12px; align-items:flex-start;">
 
                     <div>
                         <div style="
@@ -137,6 +160,16 @@
                             {{ $item->quantity }} ×
                             Rp {{ number_format($item->unit_price, 0, ',', '.') }}
                         </div>
+
+                        @if ($item->options->isNotEmpty())
+                        <div class="item-options">
+                            @foreach ($item->options as $opt)
+                                <span class="item-option-line">
+                                    {{ $opt->group_name }}: {{ $opt->option_name ?? $opt->text_value }}
+                                </span>
+                            @endforeach
+                        </div>
+                        @endif
                     </div>
 
                     <span style="font-weight:600;">
@@ -296,6 +329,14 @@
                 {{ $item->quantity }} ×
                 Rp {{ number_format($item->unit_price, 0, ',', '.') }}
             </div>
+
+            @if ($item->options->isNotEmpty())
+                @foreach ($item->options as $opt)
+                    <div class="receipt-option-line">
+                        - {{ $opt->group_name }}: {{ $opt->option_name ?? $opt->text_value }}
+                    </div>
+                @endforeach
+            @endif
 
         </div>
 

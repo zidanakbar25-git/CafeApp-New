@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Models\MenuOptionGroup;
+use App\Models\MenuOption;
 
 class AdminMenuController extends Controller
 {
@@ -113,85 +115,106 @@ class AdminMenuController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'name'        => 'required|string|max:100',
-            'description' => 'nullable|string|max:255',
-            'price'       => 'required|integer|min:0',
-            'sub_id'      => 'required|exists:sub_categories,sub_id',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
+{
+    $request->validate([
+        'name'        => 'required|string|max:100',
+        'description' => 'nullable|string|max:255',
+        'price'       => 'required|integer|min:0',
+        'sub_id'      => 'required|exists:sub_categories,sub_id',
+        'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images/menu', 'public');
-        }
-
-        DB::table('menus')->insert([
-            'sub_id'      => $request->sub_id,
-            'name'        => $request->name,
-            'description' => $request->description,
-            'price'       => $request->price,
-            'image_url'   => $imagePath ?? 'images/menu/default.jpg',
-            'is_active'   => true, // 
-            'created_at'  => now(),
-            'updated_at'  => now(),
-        ]);
-
-        return redirect()->route('admin.menu.index')
-            ->with('success', 'Menu berhasil ditambahkan!');
+    $imagePath = null;
+    if ($request->hasFile('image')) {
+        $imagePath = $request->file('image')->store('images/menu', 'public');
     }
+
+    $menuId = DB::table('menus')->insertGetId([
+        'sub_id'      => $request->sub_id,
+        'name'        => $request->name,
+        'description' => $request->description,
+        'price'       => $request->price,
+        'image_url'   => $imagePath ?? 'images/menu/default.jpg',
+        'is_active'   => true,
+        'created_at'  => now(),
+        'updated_at'  => now(),
+    ]);
+
+    $this->saveOptionGroups($menuId, $request->input('option_groups_json'));
+
+    return redirect()->route('admin.menu.index')
+        ->with('success', 'Menu berhasil ditambahkan!');
+}
 
     public function edit($id)
-    {
-        $menu = DB::table('menus')
-            ->join('sub_categories', 'menus.sub_id', '=', 'sub_categories.sub_id')
-            ->select('menus.*', 'sub_categories.category_id')
-            ->where('menus.menu_id', $id)
-            ->first();
+{
+    $menu = DB::table('menus')
+        ->join('sub_categories', 'menus.sub_id', '=', 'sub_categories.sub_id')
+        ->select('menus.*', 'sub_categories.category_id')
+        ->where('menus.menu_id', $id)
+        ->first();
 
-        abort_if(!$menu, 404, 'Menu tidak ditemukan.');
+    abort_if(!$menu, 404, 'Menu tidak ditemukan.');
 
-        $categories    = DB::table('categories')->get();
-        $subCategories = DB::table('sub_categories')->get();
+    $categories    = DB::table('categories')->get();
+    $subCategories = DB::table('sub_categories')->get();
 
-        return view('admin.manager.management.menu.edit', compact('menu', 'categories', 'subCategories'));
-    }
+    // Ambil opsi menu yang sudah tersimpan, untuk ditampilkan di form (JS repeater)
+    $optionGroupsForJs = MenuOptionGroup::where('menu_id', $menu->menu_id)
+        ->with('options')
+        ->orderBy('sort_order')
+        ->get()
+        ->map(function ($g) {
+            return [
+                'name'        => $g->name,
+                'input_type'  => $g->input_type,
+                'is_required' => (bool) $g->is_required,
+                'min_select'  => $g->min_select,
+                'max_select'  => $g->max_select,
+                'placeholder' => $g->placeholder,
+                'options'     => $g->options->pluck('name'),
+            ];
+        });
+
+    return view('admin.manager.management.menu.edit', compact('menu', 'categories', 'subCategories', 'optionGroupsForJs'));
+}
 
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name'        => 'required|string|max:100',
-            'description' => 'nullable|string|max:255',
-            'price'       => 'required|integer|min:0',
-            'sub_id'      => 'required|exists:sub_categories,sub_id',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
+{
+    $request->validate([
+        'name'        => 'required|string|max:100',
+        'description' => 'nullable|string|max:255',
+        'price'       => 'required|integer|min:0',
+        'sub_id'      => 'required|exists:sub_categories,sub_id',
+        'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
 
-        $menu = DB::table('menus')->where('menu_id', $id)->first();
-        abort_if(!$menu, 404, 'Menu tidak ditemukan.');
+    $menu = DB::table('menus')->where('menu_id', $id)->first();
+    abort_if(!$menu, 404, 'Menu tidak ditemukan.');
 
-        $data = [
-            'sub_id'      => $request->sub_id,
-            'name'        => $request->name,
-            'description' => $request->description,
-            'price'       => $request->price,
-            'is_active'   => $request->boolean('is_active'),
-            'updated_at'  => now(),
-        ];
+    $data = [
+        'sub_id'      => $request->sub_id,
+        'name'        => $request->name,
+        'description' => $request->description,
+        'price'       => $request->price,
+        'is_active'   => $request->boolean('is_active'),
+        'updated_at'  => now(),
+    ];
 
-        if ($request->hasFile('image')) {
-            if ($menu->image_url && !str_contains($menu->image_url, 'default.jpg')) {
-                Storage::disk('public')->delete($menu->image_url);
-            }
-            $data['image_url'] = $request->file('image')->store('images/menu', 'public');
+    if ($request->hasFile('image')) {
+        if ($menu->image_url && !str_contains($menu->image_url, 'default.jpg')) {
+            Storage::disk('public')->delete($menu->image_url);
         }
-
-        DB::table('menus')->where('menu_id', $id)->update($data);
-
-        return redirect()->route('admin.menu.index')
-            ->with('success', 'Menu berhasil diperbarui!');
+        $data['image_url'] = $request->file('image')->store('images/menu', 'public');
     }
+
+    DB::table('menus')->where('menu_id', $id)->update($data);
+
+    $this->saveOptionGroups($id, $request->input('option_groups_json'));
+
+    return redirect()->route('admin.menu.index')
+        ->with('success', 'Menu berhasil diperbarui!');
+}
 
     public function destroy($id)
     {
@@ -232,6 +255,58 @@ class AdminMenuController extends Controller
         ->with('success', 'Menu ' . $menu->name . ' berhasil ' . $status . '.');
 }
 
+/**
+ * Simpan opsi menu (grup + pilihan) dari JSON hasil form repeater.
+ * Pendekatan: hapus semua grup lama untuk menu ini, lalu buat ulang dari data baru.
+ * (Aman karena order_detail_options menyimpan snapshot terpisah, tidak terpengaruh.)
+ */
+private function saveOptionGroups($menuId, $optionGroupsJson)
+{
+    // Hapus grup lama (otomatis hapus options di dalamnya juga, karena onDelete cascade)
+    MenuOptionGroup::where('menu_id', $menuId)->delete();
+
+    if (!$optionGroupsJson) {
+        return;
+    }
+
+    $groups = json_decode($optionGroupsJson, true);
+
+    if (!is_array($groups)) {
+        return;
+    }
+
+    foreach ($groups as $index => $groupData) {
+        if (empty($groupData['name'])) {
+            continue;
+        }
+
+        $group = MenuOptionGroup::create([
+            'menu_id'     => $menuId,
+            'name'        => $groupData['name'],
+            'input_type'  => $groupData['input_type'] ?? 'radio',
+            'is_required' => !empty($groupData['is_required']),
+            'min_select'  => $groupData['min_select'] ?? null,
+            'max_select'  => $groupData['max_select'] ?? null,
+            'placeholder' => $groupData['placeholder'] ?? null,
+            'sort_order'  => $index,
+        ]);
+
+        if (!empty($groupData['options']) && is_array($groupData['options'])) {
+            foreach ($groupData['options'] as $optIndex => $optionName) {
+                if (trim($optionName) === '') {
+                    continue;
+                }
+
+                MenuOption::create([
+                    'group_id'   => $group->group_id,
+                    'name'       => $optionName,
+                    'sort_order' => $optIndex,
+                    'is_active'  => true,
+                ]);
+            }
+        }
+    }
+}
     
 
 }

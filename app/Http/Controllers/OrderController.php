@@ -110,7 +110,7 @@ class OrderController extends Controller
      */
     public function struk(int $id)
     {
-        $order = Order::with(['orderDetails.menu', 'payments'])->findOrFail($id);
+        $order = Order::with(['orderDetails.menu', 'orderDetails.options', 'payments'])->findOrFail($id);
 
         $payment = $order->payments()->latest()->first();
         $paymentMethod = $payment?->payment_method ?? $order->payment_method ?? '-';

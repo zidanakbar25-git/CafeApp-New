@@ -7,6 +7,7 @@ use App\Models\CafeTable;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\MenuOptionGroup;
 
 class MenuController extends Controller
 {
@@ -69,6 +70,31 @@ class MenuController extends Controller
             ->where('menus.is_active', true)
             ->get();
 
+        // Ambil semua grup opsi untuk menu-menu yang tampil, dikelompokkan per menu_id
+        $menuIds = $menus->pluck('menu_id');
+
+        $allOptionGroups = MenuOptionGroup::whereIn('menu_id', $menuIds)
+            ->with('options')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('menu_id');
+
+        // Tempelkan opsi ke masing-masing menu (stdClass) sebagai properti baru
+        foreach ($menus as $menu) {
+            $groups = $allOptionGroups->get($menu->menu_id, collect());
+
+            $menu->option_groups = $groups->map(function ($g) {
+                return [
+                    'name'        => $g->name,
+                    'input_type'  => $g->input_type,
+                    'is_required' => (bool) $g->is_required,
+                    'min_select'  => $g->min_select,
+                    'max_select'  => $g->max_select,
+                    'placeholder' => $g->placeholder,
+                    'options'     => $g->options->pluck('name'),
+                ];
+            })->values();
+        }
 
         return view('customer.menu.index', compact('tableData', 'categories', 'subCategories', 'menus', 'order', 'sessionData'));
     }

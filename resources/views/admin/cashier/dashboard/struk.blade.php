@@ -96,6 +96,18 @@
                 white-space: nowrap;
             }
 
+            .item-options {
+                margin-top: 2px;
+                padding-left: 4px;
+            }
+
+            .item-option-line {
+                display: block;
+                font-size: 10.5px;
+                color: #888;
+                line-height: 1.5;
+            }
+
             .total-row {
                 display: flex;
                 justify-content: space-between;
@@ -221,9 +233,20 @@
                 <span>Harga</span>
             </div>
 
-            @foreach($order->orderDetails as $detail)
+           @foreach($order->orderDetails as $detail)
             <div class="item-row">
-                <span class="item-name">{{ $detail->menu->name ?? '-' }}</span>
+                <span class="item-name">
+                    {{ $detail->menu->name ?? '-' }}
+                    @if ($detail->options->isNotEmpty())
+                    <span class="item-options">
+                        @foreach ($detail->options as $opt)
+                            <span class="item-option-line">
+                                - {{ $opt->group_name }}: {{ $opt->option_name ?? $opt->text_value }}
+                            </span>
+                        @endforeach
+                    </span>
+                    @endif
+                </span>
                 <span class="item-qty">{{ $detail->quantity }}</span>
                 <span class="item-price">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</span>
             </div>

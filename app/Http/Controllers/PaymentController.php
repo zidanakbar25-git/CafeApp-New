@@ -25,7 +25,7 @@ class PaymentController extends Controller
 
     public function cash($id)
     {
-        $order = Order::with('orderDetails.menu')->findOrFail($id);
+        $order = Order::with('orderDetails.menu', 'orderDetails.options')->findOrFail($id);
         $total = $order->orderDetails->sum('subtotal');
 
         if (!in_array($order->status, ['draft', 'pending_cash'])) {

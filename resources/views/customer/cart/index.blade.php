@@ -7,6 +7,29 @@
     <title>Keranjang Pesanan — Cafe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     @vite('resources/css/cart.css')
+
+    <style>
+.cart-item-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 4px 0 6px;
+    padding-left: 10px;
+    border-left: 2px solid #E4D9CB;
+}
+
+.option-tag {
+    font-size: 11.5px;
+    color: #8A7A6C;
+    line-height: 1.5;
+}
+
+.option-tag strong {
+    color: #6B4A34;
+    font-weight: 600;
+}
+</style>
+
 </head>
 <body>
 
@@ -50,6 +73,17 @@
 
                 <div class="cart-item-info">
                     <div class="cart-item-name">{{ $detail->menu->name ?? '—' }}</div>
+
+                    @if ($detail->options->isNotEmpty())
+                    <div class="cart-item-options">
+                        @foreach ($detail->options as $opt)
+                            <span class="option-tag">
+                                <strong>{{ $opt->group_name }}:</strong> {{ $opt->option_name ?? $opt->text_value }}
+                            </span>
+                        @endforeach
+                    </div>
+                    @endif
+
                     <div class="cart-item-price">
                         Rp {{ number_format($detail->unit_price, 0, ',', '.') }}
                     </div>

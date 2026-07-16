@@ -36,4 +36,11 @@ class Menu extends Model
     {
         return 'Rp ' . number_format($this->price, 0, ',', '.');
     }
+
+    public function optionGroups()
+{
+    return $this->hasMany(MenuOptionGroup::class, 'menu_id', 'menu_id')
+                ->orderBy('sort_order');
+}
+
 }

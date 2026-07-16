@@ -21,7 +21,7 @@ class DashboardController extends Controller
         // ── Kasir / role lain: tampilkan dashboard pesanan ──
         $tab = $request->get('tab', 'aktif');
 
-        $query = Order::with(['orderDetails.menu', 'payments'])->latest();
+        $query = Order::with(['orderDetails.menu', 'orderDetails.options', 'payments'])->latest();
 
         if ($tab === 'aktif') {
             $query->whereIn('status', ['pending_cash', 'menunggu', 'diproses'])

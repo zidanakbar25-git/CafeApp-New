@@ -69,4 +69,11 @@ class OrderDetail extends Model
     {
         return 'Rp ' . number_format($this->unit_price, 0, ',', '.');
     }
+
+    public function options()
+{
+    return $this->hasMany(OrderDetailOption::class, 'detail_id', 'detail_id');
+}
+
+
 }

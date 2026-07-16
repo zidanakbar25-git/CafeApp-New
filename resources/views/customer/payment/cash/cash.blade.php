@@ -38,6 +38,21 @@
             color: #777;
         }
 
+        .menu-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            margin-top: 2px;
+            padding-left: 8px;
+            border-left: 2px solid #EADCD0;
+        }
+
+        .menu-option-line {
+            font-size: 11px;
+            color: #999;
+            line-height: 1.5;
+        }
+
         .total-row {
             font-weight: bold;
         }
@@ -132,6 +147,16 @@
                     <span class="menu-qty-price">
                         {{ $detail->quantity }}x {{ number_format($detail->unit_price, 0, ',', '.') }}
                     </span>
+
+                    @if ($detail->options->isNotEmpty())
+                    <div class="menu-options">
+                        @foreach ($detail->options as $opt)
+                            <span class="menu-option-line">
+                                {{ $opt->group_name }}: {{ $opt->option_name ?? $opt->text_value }}
+                            </span>
+                        @endforeach
+                    </div>
+                    @endif
                 </div>
                 <span>
                     {{ number_format($detail->subtotal, 0, ',', '.') }}

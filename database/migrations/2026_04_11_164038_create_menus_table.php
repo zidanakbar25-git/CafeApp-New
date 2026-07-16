@@ -8,24 +8,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('menus', function ($table) {
-            $table->increments('menu_id');
-            $table->unsignedInteger('sub_id');
-
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->decimal('price', 12, 2);
-            $table->string('image_url')->nullable();
-            $table->boolean('is_active')->default(true);
-
-            $table->foreign('sub_id')->references('sub_id')->on('sub_categories')->onDelete('cascade');
-
+        Schema::create('order_detail_options', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedInteger('detail_id');        // <-- diubah dari unsignedBigInteger
+            $table->string('group_name');
+            $table->string('input_type');
+            $table->string('option_name')->nullable();
+            $table->text('text_value')->nullable();
             $table->timestamps();
+
+            $table->foreign('detail_id')
+                  ->references('detail_id')->on('order_details')
+                  ->onDelete('cascade');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('menus');
+        Schema::dropIfExists('order_detail_options');
     }
 };

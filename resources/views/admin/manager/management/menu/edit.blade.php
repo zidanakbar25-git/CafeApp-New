@@ -244,7 +244,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('admin.menu.update', $menu->menu_id) }}" method="POST" enctype="multipart/form-data">
+            <form id="edit-menu-form" action="{{ route('admin.menu.update', $menu->menu_id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -325,6 +325,98 @@
                         </div>
                     </div>
 
+                   
+
+                    {{-- ── Kelola Opsi Menu ── --}}
+                    <div class="mb-2" style="border-top: 1px solid #f3f4f6; padding-top: 24px; margin-top: 8px;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <label class="field-label" style="margin-bottom:2px;">Opsi / Catatan Menu</label>
+                                <div style="font-size:12px; color:#9ca3af;">
+                                    Contoh: Level Pedas, Pakai Gula, Catatan Tambahan. Opsi ini akan muncul sebagai modal saat customer menambah menu ke keranjang.
+                                </div>
+                            </div>
+                            <button type="button" class="btn-cancel-custom" onclick="addOptionGroup()">
+                                <i class="fa-solid fa-plus"></i> Tambah Grup
+                            </button>
+                        </div>
+
+                        <div id="option-groups-container"></div>
+                    </div>
+
+                    {{-- Template 1 grup opsi (disembunyikan, dipakai JS untuk clone) --}}
+                    <template id="option-group-template">
+                        <div class="option-group-card" style="border:1px solid #e5e7eb; border-radius:14px; padding:16px; margin-bottom:14px; background:#f9fafb;">
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-6">
+                                    <label class="field-label" style="font-size:10px;">Nama Grup</label>
+                                    <input type="text" class="input-custom group-name-input"
+                                           placeholder="Contoh: Level Pedas" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="field-label" style="font-size:10px;">Jenis Input</label>
+                                    <select class="input-custom group-type-input" onchange="handleTypeChange(this)">
+                                        <option value="radio">Radio (pilih satu)</option>
+                                        <option value="checkbox">Checkbox (boleh lebih dari satu)</option>
+                                        <option value="text">Teks bebas</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="button" class="btn-cancel-custom w-100 justify-content-center remove-group-btn" onclick="removeGroup(this)" style="color:#dc2626; border-color:#fca5a5;">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input group-required-input" type="checkbox" style="cursor:pointer;">
+                                <label class="form-check-label" style="font-size:12px; color:#6b7280;">Wajib dipilih customer</label>
+                            </div>
+
+                            {{-- Placeholder khusus text --}}
+                            <div class="group-placeholder-wrap" style="display:none; margin-bottom:10px;">
+                                <label class="field-label" style="font-size:10px;">Placeholder (opsional)</label>
+                                <input type="text" class="input-custom group-placeholder-input" placeholder="Contoh: Tulis catatan tambahan...">
+                            </div>
+
+                            {{-- Min/max khusus checkbox --}}
+                            <div class="row g-2 group-minmax-wrap" style="display:none; margin-bottom:10px;">
+                                <div class="col-md-6">
+                                    <label class="field-label" style="font-size:10px;">Minimal Pilihan</label>
+                                    <input type="number" min="0" class="input-custom group-min-input" placeholder="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="field-label" style="font-size:10px;">Maksimal Pilihan</label>
+                                    <input type="number" min="1" class="input-custom group-max-input" placeholder="Tanpa batas jika kosong">
+                                </div>
+                            </div>
+
+                            {{-- Daftar opsi (khusus radio/checkbox) --}}
+                            <div class="group-options-wrap">
+                                <label class="field-label" style="font-size:10px;">Daftar Pilihan</label>
+                                <div class="options-list"></div>
+                                <button type="button" class="btn-cancel-custom mt-1" style="font-size:12px; padding:6px 14px;" onclick="addOption(this)">
+                                    <i class="fa-solid fa-plus"></i> Tambah Pilihan
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- Template 1 baris opsi (radio/checkbox) --}}
+                    <template id="option-item-template">
+                        <div class="d-flex gap-2 align-items-center mb-2 option-item-row">
+                            <input type="text" class="input-custom option-name-input" placeholder="Contoh: Level 1" required style="flex:1;">
+                            <button type="button" class="btn-cancel-custom" onclick="removeOption(this)" style="color:#dc2626; border-color:#fca5a5; padding:8px 12px;">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </template>
+
+                    {{-- Hidden input tempat JS menaruh JSON hasil akhir sebelum submit --}}
+                    <input type="hidden" name="option_groups_json" id="option_groups_json">
+
+
+
                 </div>
 
                 <div class="form-footer">
@@ -339,6 +431,9 @@
         </div>
     </div>
 </div>
+
+
+
 
 <script>
 const currentSubId = "{{ old('sub_id', $menu->sub_id) }}";
@@ -375,6 +470,119 @@ function previewFile(event) {
         reader.readAsDataURL(file);
     }
 }
+
+const optionGroupsContainer = document.getElementById('option-groups-container');
+const groupTemplate = document.getElementById('option-group-template');
+const optionItemTemplate = document.getElementById('option-item-template');
+
+const existingOptionGroups = @json($optionGroupsForJs);
+
+
+function addOptionGroup(data = null) {
+    const clone = groupTemplate.content.cloneNode(true);
+    const card = clone.querySelector('.option-group-card');
+
+    if (data) {
+        card.querySelector('.group-name-input').value = data.name;
+        card.querySelector('.group-type-input').value = data.input_type;
+        card.querySelector('.group-required-input').checked = data.is_required;
+        card.querySelector('.group-placeholder-input').value = data.placeholder || '';
+        card.querySelector('.group-min-input').value = data.min_select ?? '';
+        card.querySelector('.group-max-input').value = data.max_select ?? '';
+    }
+
+    optionGroupsContainer.appendChild(clone);
+
+    const addedCard = optionGroupsContainer.lastElementChild;
+    handleTypeChange(addedCard.querySelector('.group-type-input'));
+
+    if (data && data.options && data.options.length > 0) {
+        data.options.forEach(name => addOptionToCard(addedCard, name));
+    }
+}
+
+function addOptionToCard(card, name = '') {
+    const clone = optionItemTemplate.content.cloneNode(true);
+    if (name) clone.querySelector('.option-name-input').value = name;
+    card.querySelector('.options-list').appendChild(clone);
+}
+
+function addOption(buttonEl) {
+    const card = buttonEl.closest('.option-group-card');
+    addOptionToCard(card);
+}
+
+function removeOption(buttonEl) {
+    buttonEl.closest('.option-item-row').remove();
+}
+
+function removeGroup(buttonEl) {
+    buttonEl.closest('.option-group-card').remove();
+}
+
+function handleTypeChange(selectEl) {
+    const card = selectEl.closest('.option-group-card');
+    const type = selectEl.value;
+
+    const optionsWrap  = card.querySelector('.group-options-wrap');
+    const minmaxWrap    = card.querySelector('.group-minmax-wrap');
+    const placeholderWrap = card.querySelector('.group-placeholder-wrap');
+
+    if (type === 'text') {
+        optionsWrap.style.display = 'none';
+        minmaxWrap.style.display = 'none';
+        placeholderWrap.style.display = 'block';
+    } else if (type === 'checkbox') {
+        optionsWrap.style.display = 'block';
+        minmaxWrap.style.display = 'flex';
+        placeholderWrap.style.display = 'none';
+    } else {
+        optionsWrap.style.display = 'block';
+        minmaxWrap.style.display = 'none';
+        placeholderWrap.style.display = 'none';
+    }
+}
+
+existingOptionGroups.forEach(g => addOptionGroup(g));
+
+document.getElementById('edit-menu-form').addEventListener('submit', function (e) {
+    const groups = [];
+
+    document.querySelectorAll('.option-group-card').forEach(card => {
+        const name = card.querySelector('.group-name-input').value.trim();
+        const type = card.querySelector('.group-type-input').value;
+
+        if (!name) return;
+
+        const group = {
+            name: name,
+            input_type: type,
+            is_required: card.querySelector('.group-required-input').checked,
+            min_select: card.querySelector('.group-min-input').value || null,
+            max_select: card.querySelector('.group-max-input').value || null,
+            placeholder: card.querySelector('.group-placeholder-input').value || null,
+            options: [],
+        };
+
+        if (type !== 'text') {
+            card.querySelectorAll('.option-name-input').forEach(input => {
+                const val = input.value.trim();
+                if (val) group.options.push(val);
+            });
+
+            if (group.options.length === 0) {
+                e.preventDefault();
+                alert(`Grup "${name}" belum punya pilihan. Tambahkan minimal 1 pilihan atau hapus grup ini.`);
+                throw new Error('Validation stopped');
+            }
+        }
+
+        groups.push(group);
+    });
+
+    document.getElementById('option_groups_json').value = JSON.stringify(groups);
+});
+
 
 document.addEventListener('DOMContentLoaded', function () {
     const initialCategoryId = document.getElementById('category_id').value;
